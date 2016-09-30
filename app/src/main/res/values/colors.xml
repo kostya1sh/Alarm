@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#4cb5ab</color>
+    <color name="colorPrimaryDark">#009688</color>
+    <color name="colorAccent">#009688</color>
+    <color name="colorFab">#ef5350</color>
+    <color name="colorArrowBack">#added9</color>
+    <color name="colorBackground">#eeeeee</color>
+    <color name="colorOptionsArrow">#dbdbdb</color>
+    <color name="colorNoAlarmText">#c5c5c5</color>
+    <color name="colorBlack">#ff000000</color>
+    <color name="colorWhite">#ffffffff</color>
+    <color name="colorDivider">#d8d8d8</color>
+</resources>
