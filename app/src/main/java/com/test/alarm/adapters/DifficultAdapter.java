@@ -46,15 +46,31 @@ public class DifficultAdapter extends BaseAdapter {
         return 0;
     }
 
+    private static class ViewHolder {
+        int position;
+        ImageView imageView;
+        RadioButton radioButton;
+    }
+
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
-        LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        ViewHolder viewHolder;
+
         if (view == null) {
-            view = inflater.inflate(R.layout.item_difficult_layout, null, false);
+            LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            view = inflater.inflate(R.layout.item_difficult_layout, viewGroup, false);
+            viewHolder = new ViewHolder();
+            viewHolder.position = i;
+            viewHolder.imageView = (ImageView) view.findViewById(R.id.imageView1);
+            viewHolder.radioButton = (RadioButton) view.findViewById(R.id.rb1);
+            view.setTag(viewHolder);
+        } else {
+            viewHolder = (ViewHolder) view.getTag();
         }
 
-        ImageView imageView = (ImageView) view.findViewById(R.id.imageView1);
-        RadioButton radioButton = (RadioButton) view.findViewById(R.id.rb1);
+        ImageView imageView = viewHolder.imageView;
+        RadioButton radioButton = viewHolder.radioButton;
+
         imageView.setImageBitmap(bitmaps.get(i));
         radioButton.setText(values.get(i));
 

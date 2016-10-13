@@ -1,10 +1,13 @@
 package com.test.alarm.adapters;
 
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,6 +62,7 @@ public class AlarmsAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
+    @TargetApi(24)
     private PendingIntent setAlarm(AlarmEntity alarmEntity) {
         Intent i = new Intent(mainActivity, AlarmReceiver.class);
 
@@ -68,7 +72,16 @@ public class AlarmsAdapter extends BaseAdapter {
 
         PendingIntent pi = PendingIntent.getBroadcast(mainActivity, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager alarmManager = (AlarmManager) mainActivity.getSystemService(Context.ALARM_SERVICE);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, alarmEntity.getDate().getTime(), pi);
+
+        int currentApiVersion = android.os.Build.VERSION.SDK_INT;
+        if (currentApiVersion >= Build.VERSION_CODES.KITKAT && currentApiVersion < Build.VERSION_CODES.M){
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, alarmEntity.getDate().getTime(), pi);
+        } else if (currentApiVersion >= Build.VERSION_CODES.M) {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alarmEntity.getDate().getTime(), pi);
+        } else {
+            alarmManager.set(AlarmManager.RTC_WAKEUP, alarmEntity.getDate().getTime(), pi);
+        }
+
         return pi;
     }
 
@@ -99,18 +112,47 @@ public class AlarmsAdapter extends BaseAdapter {
         return 0;
     }
 
+    private static class ViewHolder {
+        int position;
+        ImageView imgType;
+        ImageView imgDifficult;
+        TextView tvTime;
+        TextView tvDate;
+        TextView tvDayOfWeek;
+        TextView tvMsg;
+        Switch switchAlarmActivated;
+        LinearLayout llDivider;
+    }
+
     @Override
     public View getView(final int i, View view, ViewGroup viewGroup) {
-        LayoutInflater inflater = (LayoutInflater) mainActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        view = inflater.inflate(R.layout.item_alarm_layout, null, false);
+        ViewHolder viewHolder;
+        if (view == null) {
+            LayoutInflater inflater = (LayoutInflater) mainActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            view = inflater.inflate(R.layout.item_alarm_layout, viewGroup, false);
+            viewHolder = new ViewHolder();
+            viewHolder.position = i;
+            viewHolder.imgType = (ImageView) view.findViewById(R.id.imgAlarmType);
+            viewHolder.imgDifficult = (ImageView) view.findViewById(R.id.imgAlarmDifficult);
+            viewHolder.tvTime = (TextView) view.findViewById(R.id.tvAlarmTime);
+            viewHolder.tvDate = (TextView) view.findViewById(R.id.tvAlarmDate);
+            viewHolder.tvDayOfWeek = (TextView) view.findViewById(R.id.tvAlarmDayOfWeek);
+            viewHolder.tvMsg = (TextView) view.findViewById(R.id.tvAlarmMsg);
+            viewHolder.switchAlarmActivated = (Switch) view.findViewById(R.id.switchAlarmActivated);
+            viewHolder.llDivider = (LinearLayout) view.findViewById(R.id.llAlarmDivider);
+            view.setTag(viewHolder);
+        } else {
+            viewHolder = (ViewHolder) view.getTag();
+        }
 
-        ImageView imgType = (ImageView) view.findViewById(R.id.imgAlarmType);
-        ImageView imgDifficult = (ImageView) view.findViewById(R.id.imgAlarmDifficult);
-        TextView tvTime = (TextView) view.findViewById(R.id.tvAlarmTime);
-        TextView tvDate = (TextView) view.findViewById(R.id.tvAlarmDate);
-        TextView tvDayOfWeek = (TextView) view.findViewById(R.id.tvAlarmDayOfWeek);
-        TextView tvMsg = (TextView) view.findViewById(R.id.tvAlarmMsg);
-        Switch switchAlarmActivated = (Switch) view.findViewById(R.id.switchAlarmActivated);
+        ImageView imgType = viewHolder.imgType;
+        ImageView imgDifficult = viewHolder.imgDifficult;
+        TextView tvTime = viewHolder.tvTime;
+        TextView tvDate = viewHolder.tvDate;
+        TextView tvDayOfWeek = viewHolder.tvDayOfWeek;
+        TextView tvMsg = viewHolder.tvMsg;
+        Switch switchAlarmActivated = viewHolder.switchAlarmActivated;
+        LinearLayout llDivider = viewHolder.llDivider;
 
         final AlarmEntity alarmEntity = alarmEntityList.get(i);
         switch (alarmEntity.getType()) {
@@ -169,9 +211,11 @@ public class AlarmsAdapter extends BaseAdapter {
         tvDayOfWeek.setText(new SimpleDateFormat("EEEE", Locale.getDefault()).format(alarmEntity.getDate()));
         tvMsg.setText(alarmEntity.getMsg());
 
-        LinearLayout llDivider = (LinearLayout) view.findViewById(R.id.llAlarmDivider);
+
         if (i == alarmEntityList.size() - 1) {
             llDivider.setVisibility(View.GONE);
+        } else {
+            llDivider.setVisibility(View.VISIBLE);
         }
 
         return view;
